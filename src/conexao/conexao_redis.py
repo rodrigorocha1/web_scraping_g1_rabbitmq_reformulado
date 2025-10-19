@@ -2,7 +2,7 @@ from typing import Dict
 
 import redis
 
-from src.conexao.IOperacao import IOperacao
+from src.conexao.ioperacao import IOperacao
 from src.config.config import Config
 
 

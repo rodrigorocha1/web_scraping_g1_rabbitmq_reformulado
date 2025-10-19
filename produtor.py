@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 
 from conf_rabbitmq.configuacao_dlx import ConfiguracaoDLX
 from enuns.enum_status import EnumStatus
-from src.conexao.IOperacao import IOperacao
+from src.conexao.ioperacao import IOperacao
 from src.conexao.conexao_redis import ConexaoRedis
 from src.servicos.extracao.iwebscrapingbase import IWebScapingBase
 from src.servicos.extracao.webscrapingbs4g1rss import WebScrapingBs4G1Rss
