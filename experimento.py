@@ -1,3 +1,8 @@
-url = 'https://g1.globo.com/sp/ribeirao-preto-franca/noticia/2025/10/19/vitima-agradece-oracoes-apos-sobreviver-a-queda-de-cobertura-de-arquibancada-em-torneio-de-beach-tennis-video.ghtml'
+from datetime import datetime
 
-print(url.split('/')[-1].split('.')[-2])
+
+data_agora = datetime.now()
+data_formatada = data_agora.strftime("%d-%m-%Y %H:%M:%S")
+data_convertida = datetime.strptime(data_formatada, "%d-%m-%Y %H:%M:%S")
+print("Convertida para datetime:", data_convertida)
+print(data_formatada, type(data_formatada))

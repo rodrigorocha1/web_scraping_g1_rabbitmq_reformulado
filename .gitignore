@@ -2,6 +2,7 @@
 __pycache__
 mongo-data/
 noticia
+*.odt#
 .env
 .vpp.
 /docs/diagrama_de_classe.vpp.bak_023d
