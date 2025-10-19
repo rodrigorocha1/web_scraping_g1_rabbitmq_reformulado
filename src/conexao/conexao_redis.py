@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, override
 
 import redis
 
@@ -20,6 +20,7 @@ class ConexaoRedis(IOperacao):
         )
         self.__tempo_expiracao = 604800
 
+    @override
     def gravar_registro(self, chave: str, dados: Dict[str, str]):
         """
         Método para gerar o het

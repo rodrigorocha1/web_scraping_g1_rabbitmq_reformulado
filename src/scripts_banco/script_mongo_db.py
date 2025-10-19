@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, override
 
 from src.models.noticia import Noticia
 from src.scripts_banco.iscript_banco import IScriptBanco
@@ -6,6 +6,7 @@ from src.scripts_banco.iscript_banco import IScriptBanco
 
 class ScriptMongoDB(IScriptBanco):
 
+    @override
     def realizar_insercao_lote(self, noticia: Noticia) -> Dict:
         doc = {
             "id_site": "g1",
