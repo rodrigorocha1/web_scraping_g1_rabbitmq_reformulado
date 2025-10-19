@@ -5,6 +5,7 @@ import pika
 from bs4 import BeautifulSoup
 
 from conf_rabbitmq.configuacao_dlx import ConfiguracaoDLX
+from src.conexao.conexao_redis import ConexaoRedis
 from src.servicos.extracao.iwebscrapingbase import IWebScapingBase
 from src.servicos.extracao.webscrapingbs4g1rss import WebScrapingBs4G1Rss
 
@@ -25,6 +26,7 @@ class Produtor:
         self.__conexao = pika.BlockingConnection(self.__parametros_conexao)
         self.__servico_web_scraping = servico_web_scraping
         self.__exchange_dlx = ConfiguracaoDLX()
+        self.banco_redis = ConexaoRedis()
 
     def rodar(self, urls_rss: Dict[str, str]):
         canal = self.__conexao.channel()
@@ -45,6 +47,7 @@ class Produtor:
                                     body=url_g1,
                                     properties=pika.BasicProperties(delivery_mode=2)
                                 )
+                        texto_noticia = url_rss.split('/')[-1].split('.')[-2]
             except KeyboardInterrupt:
                 self.__conexao.close()
             time.sleep(10)

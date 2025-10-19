@@ -1,17 +1,18 @@
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
 
 load_dotenv()
 
 
 class Config:
-    URL_FILA = os.environ['URL_FILA']
-    USR_FILA = os.environ['USR_FILA']
-    PORTA_FILA = os.environ['PORTA_FILA']
-    PASSWD_FILA = os.environ['PASSWD_FILA']
-
+    URL_RABBITMQ = os.environ['URL_RABBITMQ']
+    PORTA_RABBITMQ = os.environ['PORTA_RABBITMQ']
+    USR_RABBITMQ = os.environ['USR_RABBITMQ']
+    PWD_RABBITMQ = os.environ['PWD_RABBITMQ']
+    VIRTUAL_HOST_RABBITMQ = os.environ['VIRTUAL_HOST_RABBITMQ']
     URL_REDIS = os.environ['URL_REDIS']
     PORTA_REDIS = os.environ['PORTA_REDIS']
-    DB_REDIS = os.environ['DB']
     USR_REDIS = os.environ['USR_REDIS']
     SENHA_REDIS = os.environ['SENHA_REDIS']
+    DB_REDIS = os.environ['DB']
