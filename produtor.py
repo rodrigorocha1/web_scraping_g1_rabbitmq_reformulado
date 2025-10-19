@@ -2,6 +2,8 @@ import time
 
 import pika
 from bs4 import BeautifulSoup
+
+from conf_rabbitmq.configuacao_dlx import ConfiguracaoDLX
 from src.servicos.extracao.webscrapingbs4g1rss import WebScrapingBs4G1Rss
 from src.servicos.extracao.iwebscrapingbase import IWebScapingBase
 from typing import Dict, Generator, Any
@@ -22,20 +24,8 @@ class Produtor:
         )
         self.__conexao = pika.BlockingConnection(self.__parametros_conexao)
         self.__servico_web_scraping = servico_web_scraping
-        self.__exchange_dlx = 'dead_letter_exchange'
+        self.__exchange_dlx = ConfiguracaoDLX()
 
-    def criar_fila_com_dlx(self, nome_fila: str, canal: BlockingChannel):
-        fila_dlq = f"{nome_fila}_dead_letter"
-        canal.exchange_declare(exchange=self.__exchange_dlx, exchange_type='direct', durable=True)
-        canal.queue_declare(queue=fila_dlq, durable=True, arguments={
-            "x-message-ttl": 60000  # 60 segundos
-        })
-        canal.queue_bind(exchange=self.__exchange_dlx, queue=fila_dlq, routing_key=fila_dlq)
-        args = {
-            "x-dead-letter-exchange": self.__exchange_dlx,
-            "x-dead-letter-routing-key": fila_dlq
-        }
-        canal.queue_declare(queue=nome_fila, durable=True, arguments=args)
 
 
     def rodar(self, urls_rss: Dict[str, str]):
@@ -43,7 +33,7 @@ class Produtor:
         while True:
             try:
                 for nome_fila, url_rss in urls_rss.items():
-                    self.criar_fila_com_dlx(nome_fila=nome_fila, canal=canal)
+                    self.__exchange_dlx.criar_fila_dlx(nome_fila=nome_fila, canal=canal)
                     self.__servico_web_scraping.url = url_rss
                     dados = self.__servico_web_scraping.abrir_conexao()
                     if dados:
