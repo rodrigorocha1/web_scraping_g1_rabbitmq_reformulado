@@ -19,7 +19,7 @@ class Produtor:
         self.__parametros_conexao = pika.ConnectionParameters(
             host=Config.URL_RABBITMQ,
             port=Config.PORTA_RABBITMQ,
-            virtual_host='/',
+            virtual_host=Config.VIRTUAL_HOST_RABBITMQ,
             credentials=self.__credenciais
         )
         self.__conexao = pika.BlockingConnection(self.__parametros_conexao)
