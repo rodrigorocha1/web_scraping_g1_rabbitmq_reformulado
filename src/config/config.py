@@ -7,6 +7,7 @@ load_dotenv()
 
 class Config:
     URL_RABBITMQ = os.environ['URL_RABBITMQ']
+
     PORTA_RABBITMQ = os.environ['PORTA_RABBITMQ']
     USR_RABBITMQ = os.environ['USR_RABBITMQ']
     PWD_RABBITMQ = os.environ['PWD_RABBITMQ']
@@ -16,3 +17,6 @@ class Config:
     USR_REDIS = os.environ['USR_REDIS']
     SENHA_REDIS = os.environ['SENHA_REDIS']
     DB_REDIS = os.environ['DB']
+    URL_MONGODB = os.environ['URL_MONGODB']
+    MONGODB_DOCUMENTO = os.environ['MONGODB_DOCUMENTO']
+    MONGODB_COLECAO = os.environ['MONGODB_COLECAO']
