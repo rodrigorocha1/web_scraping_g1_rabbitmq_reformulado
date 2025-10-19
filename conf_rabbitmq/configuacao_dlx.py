@@ -24,7 +24,7 @@ class ConfiguracaoDLX:
         )
 
         args = {
-            'x-deaf-letter-exange': self.__exchange_dlx,
+            'x-dead-letter-exange': self.__exchange_dlx,
             'x-dead-letter-routing_key': fila_dlq
         }
         canal.queue_declare(queue=nome_fila, durable=True, arguments=args)

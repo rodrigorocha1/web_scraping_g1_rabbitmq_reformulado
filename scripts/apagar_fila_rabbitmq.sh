@@ -18,8 +18,8 @@ fi
 FILAS=$(docker exec -it $RABBITMQ_CONTAINTER rabbitmqctl list_queues -q | awk '{print $1}')
 
 for FILA in $FILAS; do
-  echo  "Deletando fila: @FILA"
-  docker exec -it $RABBITMQ_CONTAINTER rabbitmqctl delente_queue "$FILA"
+  echo  "Deletando fila: $FILA"
+  docker exec -it $RABBITMQ_CONTAINTER rabbitmqctl delete_queue "$FILA"
 done
 
 echo "Todas as filas deletadas"
