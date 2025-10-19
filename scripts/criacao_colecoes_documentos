@@ -1,0 +1,56 @@
+use web_scraping_sites_rss;
+
+db.createCollection('sites');
+
+db.sites.createIndex({url_rss: 1},{unique:true});
+
+db.createCollection('Sites', {
+    validator: {
+        $jsonSchema :{
+            bsonType: "Object",
+            properties: {
+                nome :{
+                    bsonType: "string",
+                    minLenth: 0,
+                    maxLength: 50,
+                    
+                },
+                url: { 
+                  bsonType: "string", 
+                  pattern: "^.+@.+\\..+$",
+                  minLength: 5,
+                  maxLength: 200
+                },
+                data_criacao: {
+                    bys
+                }
+            }
+        }
+    }   
+    }
+)
+
+db.sites.insertMany(
+    [
+        {
+            nome : "G1 Ribeirão Preto",
+            url_rss: "https://g1.globo.com/rss/g1/sp/ribeirao-preto-franca",
+            data_criacao: new Date()
+        },
+        {
+            nome : "G1 Pará",
+            url_rss: "https://g1.globo.com/rss/g1/pa/para/",
+            data_criacao: new Date()
+        },
+        {
+            nome : "Tecnologia e Games",
+            url_rss: "https://g1.globo.com/dynamo/tecnologia/rss2.xml",
+            data_criacao: new Date()
+        }
+    ]
+)
+
+db.sites.find().pretty();
+
+
+db.createCollection("noticias");
