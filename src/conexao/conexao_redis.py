@@ -18,6 +18,7 @@ class ConexaoRedis(IOperacao):
             db=self.__db,
             decode_responses=True
         )
+        self.__tempo_expiracao = 604800
 
     def gravar_registro_log(self, chave: str, dados: Dict[str, str]):
         """
@@ -30,5 +31,6 @@ class ConexaoRedis(IOperacao):
         :rtype: Data
         """
         self.__cliente_redis.hset(
-            chave, mapping=dados
+            chave, mapping=dados,
         )
+        self.__cliente_redis.expire(chave, self.__tempo_expiracao)

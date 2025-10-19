@@ -1,10 +1,12 @@
 import time
+from datetime import datetime
 from typing import Dict, Generator, Any
 
 import pika
 from bs4 import BeautifulSoup
 
 from conf_rabbitmq.configuacao_dlx import ConfiguracaoDLX
+from enuns.enum_status import EnumStatus
 from src.conexao.IOperacao import IOperacao
 from src.conexao.conexao_redis import ConexaoRedis
 from src.servicos.extracao.iwebscrapingbase import IWebScapingBase
@@ -17,7 +19,7 @@ from src.config.config import Config
 
 class Produtor:
     def __init__(self, servico_web_scraping: IWebScapingBase[BeautifulSoup, DadosG1Gerador], operacao_banco: IOperacao):
-        self.__credenciais = pika.PlainCredentials(Config.USR_RABBITMQ, Config.USR_RABBITMQ)
+        self.__credenciais = pika.PlainCredentials(Config.USR_RABBITMQ, Config.PWD_RABBITMQ)
         self.__parametros_conexao = pika.ConnectionParameters(
             host=Config.URL_RABBITMQ,
             port=Config.PORTA_RABBITMQ,
@@ -27,7 +29,7 @@ class Produtor:
         self.__conexao = pika.BlockingConnection(self.__parametros_conexao)
         self.__servico_web_scraping = servico_web_scraping
         self.__exchange_dlx = ConfiguracaoDLX()
-        self.banco = operacao_banco
+        self.__banco = operacao_banco
 
     def rodar(self, urls_rss: Dict[str, str]):
         canal = self.__conexao.channel()
@@ -48,7 +50,18 @@ class Produtor:
                                     body=url_g1,
                                     properties=pika.BasicProperties(delivery_mode=2)
                                 )
-                        texto_noticia = url_rss.split('/')[-1].split('.')[-2]
+                            texto_noticia = url_g1.split('/')[-1].split('.')[-2]
+                            chave = f'log:g1:{nome_fila}:{texto_noticia}'
+                            data_agora = datetime.now()
+                            data_formatada = data_agora.strftime("%d-%m-%Y %H:%M:%S")
+                            dados = {
+                                'url': url_g1,
+                                'status': EnumStatus.EM_PROCESSO.name,
+                                'data_envio': data_formatada
+
+                            }
+                            self.__banco.gravar_registro_log(chave=chave, dados=dados)
+
             except KeyboardInterrupt:
                 self.__conexao.close()
             time.sleep(10)

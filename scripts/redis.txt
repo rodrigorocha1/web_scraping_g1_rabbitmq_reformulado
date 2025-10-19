@@ -1,0 +1,3 @@
+--------- Chave valor de log
+KEYS "log:*"
+HGETALL 'log:g1:fila_g1_para:incendios-em-lixoes-do-marajo-e-baixo-tocantins-afetam-moradores-ha-quatro-dias'
