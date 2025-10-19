@@ -2,10 +2,11 @@ from typing import Dict
 
 import redis
 
+from src.conexao.IOperacao import IOperacao
 from src.config.config import Config
 
 
-class ConexaoRedis:
+class ConexaoRedis(IOperacao):
 
     def __init__(self):
         self.__host = Config.URL_REDIS
@@ -18,7 +19,7 @@ class ConexaoRedis:
             decode_responses=True
         )
 
-    def gravar_hset(self, chave: str, dados: Dict[str, str]):
+    def gravar_registro_log(self, chave: str, dados: Dict[str, str]):
         """
         Método para gerar o het
         :param chave: chave de gravação
