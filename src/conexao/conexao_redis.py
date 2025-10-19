@@ -20,7 +20,7 @@ class ConexaoRedis(IOperacao):
         )
         self.__tempo_expiracao = 604800
 
-    def gravar_registro_log(self, chave: str, dados: Dict[str, str]):
+    def gravar_registro(self, chave: str, dados: Dict[str, str]):
         """
         Método para gerar o het
         :param chave: chave de gravação

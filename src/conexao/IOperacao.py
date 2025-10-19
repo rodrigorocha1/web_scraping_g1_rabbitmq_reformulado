@@ -5,5 +5,5 @@ from typing import Dict
 class IOperacao(ABC):
 
     @abstractmethod
-    def gravar_registro_log(self, chave: str, dados: Dict[str, str]):
+    def gravar_registro(self, chave: str, dados: Dict[str, str]):
         pass

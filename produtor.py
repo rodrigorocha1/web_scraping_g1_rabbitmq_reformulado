@@ -60,7 +60,7 @@ class Produtor:
                                 'data_envio': data_formatada
 
                             }
-                            self.__banco.gravar_registro_log(chave=chave, dados=dados)
+                            self.__banco.gravar_registro(chave=chave, dados=dados)
 
             except KeyboardInterrupt:
                 self.__conexao.close()

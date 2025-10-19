@@ -1,4 +1,5 @@
 import sys
+from typing import List, Dict
 
 import pika
 from bs4 import BeautifulSoup
@@ -9,6 +10,8 @@ from pika.spec import BasicProperties
 from conf_rabbitmq.configuacao_dlx import ConfiguracaoDLX
 from src.conexao.conexao_redis import ConexaoRedis
 from src.models.noticia import Noticia
+from src.scripts_banco.iscript_banco import IScriptBanco
+from src.scripts_banco.script_mongo_db import ScriptMongoDB
 from src.servicos.extracao.iwebscrapingbase import IWebScapingBase
 from src.servicos.extracao.webscrapingsiteg1 import WebScrapingG1
 from src.servicos.manipulador.arquivo_docx import ArquivoDOCX
@@ -21,8 +24,12 @@ from src.config.config import Config
 
 class NoticiaTrabalhador:
 
-    def __init__(self, nome_fila: str, servico_web_scraping: IWebScapingBase[BeautifulSoup, DadosG1Gerador],
-                 ):
+    def __init__(
+            self,
+            nome_fila: str,
+            servico_web_scraping: IWebScapingBase[BeautifulSoup, DadosG1Gerador],
+            consuta: IScriptBanco
+    ):
         self.__credenciais = pika.PlainCredentials(Config.USR_RABBITMQ, Config.PWD_RABBITMQ)
         self.__parametros_conexao = pika.ConnectionParameters(
             host=Config.URL_RABBITMQ,
@@ -32,11 +39,13 @@ class NoticiaTrabalhador:
         )
         self.__conexao = pika.BlockingConnection(self.__parametros_conexao)
         self.__servico_web_scraping = servico_web_scraping
-
         self.__nome_fila = nome_fila
         self.__conexao_redis = ConexaoRedis()
         self.__exchange_dlx = 'dead_letter_exchange'
         self.__dlq_queue = f'{nome_fila}_dead_letter'
+        self.__consulta = consuta
+        self.__lote: List[Dict] = []
+        self.__tamanho_lote = 60
 
     def configurar_fila(self):
         canal = self.__conexao.channel()
@@ -98,6 +107,7 @@ if __name__ == '__main__':
     arquivo = ArquivoDOCX()
     notica_worker = NoticiaTrabalhador(
         nome_fila=nome_fila,
-        servico_web_scraping=servico_web_scraping
+        servico_web_scraping=servico_web_scraping,
+        consuta=ScriptMongoDB()
     )
     notica_worker.rodar()
