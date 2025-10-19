@@ -5,17 +5,18 @@ import pika
 from bs4 import BeautifulSoup
 
 from conf_rabbitmq.configuacao_dlx import ConfiguracaoDLX
+from src.conexao.IOperacao import IOperacao
 from src.conexao.conexao_redis import ConexaoRedis
 from src.servicos.extracao.iwebscrapingbase import IWebScapingBase
 from src.servicos.extracao.webscrapingbs4g1rss import WebScrapingBs4G1Rss
 
 TIPO_SCRAPING = BeautifulSoup
 DadosG1Gerador = Generator[Dict[str, Any], None, None]
-from config.config import Config
+from src.config.config import Config
 
 
 class Produtor:
-    def __init__(self, servico_web_scraping: IWebScapingBase[BeautifulSoup, DadosG1Gerador]):
+    def __init__(self, servico_web_scraping: IWebScapingBase[BeautifulSoup, DadosG1Gerador], operacao_banco: IOperacao):
         self.__credenciais = pika.PlainCredentials(Config.USR_RABBITMQ, Config.USR_RABBITMQ)
         self.__parametros_conexao = pika.ConnectionParameters(
             host=Config.URL_RABBITMQ,
@@ -26,7 +27,7 @@ class Produtor:
         self.__conexao = pika.BlockingConnection(self.__parametros_conexao)
         self.__servico_web_scraping = servico_web_scraping
         self.__exchange_dlx = ConfiguracaoDLX()
-        self.banco_redis = ConexaoRedis()
+        self.banco = operacao_banco
 
     def rodar(self, urls_rss: Dict[str, str]):
         canal = self.__conexao.channel()
@@ -61,7 +62,8 @@ if __name__ == '__main__':
     }
     rss_servico = WebScrapingBs4G1Rss(url=None)
     produtor = Produtor(
-        servico_web_scraping=rss_servico
+        servico_web_scraping=rss_servico,
+        operacao_banco=ConexaoRedis()
     )
 
     produtor.rodar(urls_rss=urls_rss)
