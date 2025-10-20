@@ -13,7 +13,7 @@ class Config:
     PWD_RABBITMQ: Final[str] = os.environ['PWD_RABBITMQ']
     VIRTUAL_HOST_RABBITMQ: Final[str] = os.environ['VIRTUAL_HOST_RABBITMQ']
     URL_REDIS: Final[str] = os.environ['URL_REDIS']
-    PORTA_REDIS: Final[str] = os.environ['PORTA_REDIS']
+    PORTA_REDIS: Final[int] = os.environ['PORTA_REDIS']
     USR_REDIS: Final[str] = os.environ['USR_REDIS']
     SENHA_REDIS: Final[str] = os.environ['SENHA_REDIS']
     DB_REDIS: Final[int] = os.environ['DB']
