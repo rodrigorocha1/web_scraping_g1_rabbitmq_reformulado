@@ -46,11 +46,11 @@ class NoticiaTrabalhador:
         self.__consulta = consuta
         self.__lote: List[Dict] = []
         self.__tamanho_lote = 60
+        self.__dlx = ConfiguracaoDLX(self.__exchange_dlx)
 
     def configurar_fila(self):
         canal = self.__conexao.channel()
-        dlx = ConfiguracaoDLX(self.__exchange_dlx)
-        dlx.criar_fila_dlx(nome_fila=self.__nome_fila, canal=canal)
+        self.__dlx.criar_fila_dlx(nome_fila=self.__nome_fila, canal=canal)
         return canal
 
     def processar_noticia(self, url: str, set_name: str, method: Basic.Deliver):

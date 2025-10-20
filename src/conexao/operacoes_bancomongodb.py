@@ -15,4 +15,5 @@ class OperacoesBancoMongoDB(IOperacao):
 
     @override
     def gravar_registro(self, chave: str, dados: List[Dict[str, str]]):
-        self.__colecao.insert_many(dados)
+        with self.__mongo:
+            self.__colecao.insert_many(dados)
