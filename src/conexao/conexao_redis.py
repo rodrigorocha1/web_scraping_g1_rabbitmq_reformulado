@@ -1,6 +1,7 @@
-from typing import Dict, override
+from typing import Dict
 
 import redis
+from typing_extensions import override
 
 from src.conexao.ioperacao import IOperacao
 from src.config.config import Config

@@ -7,7 +7,7 @@ from pika.adapters.blocking_connection import BlockingChannel
 from pika.spec import Basic
 from pika.spec import BasicProperties
 
-from conf_rabbitmq.configuacao_dlx import ConfiguracaoDLX
+from src.conf_rabbitmq.configuacao_dlx import ConfiguracaoDLX
 from src.conexao.conexao_redis import ConexaoRedis
 from src.models.noticia import Noticia
 from src.scripts_banco.iscript_banco import IScriptBanco

@@ -1,6 +1,7 @@
-from typing import Dict, List, override
+from typing import Dict, List
 
 from pymongo import MongoClient
+from typing_extensions import override
 
 from src.conexao.ioperacao import IOperacao
 from src.config.config import Config

@@ -5,7 +5,7 @@ from typing import Dict, Generator, Any
 import pika
 from bs4 import BeautifulSoup
 
-from conf_rabbitmq.configuacao_dlx import ConfiguracaoDLX
+from src.conf_rabbitmq.configuacao_dlx import ConfiguracaoDLX
 from enuns.enum_status import EnumStatus
 from src.conexao.ioperacao import IOperacao
 from src.conexao.conexao_redis import ConexaoRedis
