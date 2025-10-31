@@ -20,5 +20,6 @@ class OperacoesBancoMongoDB(IOperacao):
         with self.__mongo:
             self.__colecao.insert_many(dados)
 
+
 if __name__ == '__main__':
     o = OperacoesBancoMongoDB()
