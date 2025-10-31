@@ -62,12 +62,12 @@ db.sites.find().pretty();
 
 db.createCollection("noticias", {
   validator: {
-    $jsonSchema: {s
+    $jsonSchema: {
       bsonType: "object",
       required: ["id_site", "noticias"],
       properties: {
         id_site: {
-          bsonType: "string",
+          bsonType: "int",
           description: "ID do site é obrigatório"
         },
         noticias: {
@@ -89,3 +89,7 @@ db.createCollection("noticias", {
     }
   }
 });
+
+
+db.noticias.find({ id_site: 3 })
+db.noticias.deleteMany({})
