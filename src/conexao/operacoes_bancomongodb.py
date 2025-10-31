@@ -16,7 +16,7 @@ class OperacoesBancoMongoDB(IOperacao):
         print(self.__db.list_collection_names())
 
     @override
-    def gravar_registro(self, chave: int, dados: List[Dict[str, str]]):
+    def gravar_registro(self, dados: List[Dict[str, str]]):
         with self.__mongo:
             self.__colecao.insert_many(dados)
 
