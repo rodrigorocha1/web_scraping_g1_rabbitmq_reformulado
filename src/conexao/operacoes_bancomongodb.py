@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from pymongo import MongoClient
 from typing_extensions import override
@@ -15,7 +15,7 @@ class OperacoesBancoMongoDB(IOperacao):
         self.__colecao = self.__db[Config.MONGODB_COLECAO]
 
     @override
-    def gravar_registro(self, dados: List[Dict[str, str]]):
+    def gravar_registro(self, dados: List[Dict[str, str]], chave: Union[int, str] = None):
         with self.__mongo:
             self.__colecao.insert_many(dados)
 
