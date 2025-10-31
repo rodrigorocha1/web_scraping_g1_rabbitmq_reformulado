@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from src.conf_rabbitmq.configuacao_dlx import ConfiguracaoDLX
 from enuns.enum_status import EnumStatus
 from src.conexao.ioperacao import IOperacao
-from src.conexao.conexao_redis import ConexaoRedis
+from src.conexao.conexao_redis import OperacaoRedis
 from src.servicos.extracao.iwebscrapingbase import IWebScapingBase
 from src.servicos.extracao.webscrapingbs4g1rss import WebScrapingBs4G1Rss
 
@@ -78,7 +78,7 @@ if __name__ == '__main__':
     rss_servico = WebScrapingBs4G1Rss(url=None)
     produtor = Produtor(
         servico_web_scraping=rss_servico,
-        operacao_banco=ConexaoRedis()
+        operacao_banco=OperacaoRedis()
     )
 
     produtor.rodar(urls_rss=urls_rss)

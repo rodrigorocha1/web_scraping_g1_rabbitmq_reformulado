@@ -5,7 +5,7 @@ import pytest
 
 from enuns.enum_status import EnumStatus
 from produtor import Produtor
-from src.conexao.conexao_redis import ConexaoRedis
+from src.conexao.conexao_redis import OperacaoRedis
 from src.conf_rabbitmq.configuacao_dlx import ConfiguracaoDLX
 from src.servicos.extracao.webscrapingbs4g1rss import WebScrapingBs4G1Rss
 
@@ -23,7 +23,7 @@ class FakeScrapingService(WebScrapingBs4G1Rss):
         ]
 
 
-class FakeBanco(ConexaoRedis):
+class FakeBanco(OperacaoRedis):
     """Simula gravação no Redis sem acesso real"""
 
     def __init__(self):

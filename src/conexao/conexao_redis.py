@@ -7,7 +7,7 @@ from src.conexao.ioperacao import IOperacao
 from src.config.config import Config
 
 
-class ConexaoRedis(IOperacao):
+class OperacaoRedis(IOperacao):
 
     def __init__(self):
         self.__host = Config.URL_REDIS

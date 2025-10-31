@@ -7,7 +7,7 @@ from pika.adapters.blocking_connection import BlockingChannel
 from pika.spec import Basic
 from pika.spec import BasicProperties
 
-from src.conexao.conexao_redis import ConexaoRedis
+from src.conexao.conexao_redis import OperacaoRedis
 from src.conexao.ioperacao import IOperacao
 from src.conexao.operacoes_bancomongodb import OperacoesBancoMongoDB
 from src.conf_rabbitmq.configuacao_dlx import ConfiguracaoDLX
@@ -42,7 +42,7 @@ class NoticiaTrabalhador:
         self.__conexao = pika.BlockingConnection(self.__parametros_conexao)
         self.__servico_web_scraping = servico_web_scraping
         self.__nome_fila = nome_fila
-        self.__conexao_redis = ConexaoRedis()
+        self.__conexao_redis = OperacaoRedis()
         self.__exchange_dlx = 'dead_letter_exchange'
         self.__dlq_queue = f'{nome_fila}_dead_letter'
         self.__scripts_banco = script_banco
