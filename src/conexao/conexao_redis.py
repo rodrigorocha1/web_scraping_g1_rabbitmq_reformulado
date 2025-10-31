@@ -36,3 +36,15 @@ class OperacaoRedis(IOperacao):
             chave, mapping=dados,
         )
         self.__cliente_redis.expire(chave, self.__tempo_expiracao)
+
+    @override
+    def enviar_url_processada(self, chave: str, params: Dict):
+        self.__cliente_redis.zadd(chave, {params['valor']: params['score']})
+
+    @override
+    def consultar_url_processada(self, chave: str, link: str) -> bool:
+        score = self.__cliente_redis.zscore(chave, link)
+        print(score, link)
+        if score is not None:
+            return True
+        return False

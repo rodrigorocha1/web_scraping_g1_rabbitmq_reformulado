@@ -50,6 +50,7 @@ class NoticiaTrabalhador:
         self.__lote: List[Dict] = []
         self.__tamanho_lote = 60
         self.__dlx = ConfiguracaoDLX(self.__exchange_dlx)
+        self.__chave_links_processados = f'links:processados:{self.__nome_fila.replace("fila_g1_", "")}'
 
     def configurar_fila(self):
         canal = self.__conexao.channel()
@@ -63,12 +64,20 @@ class NoticiaTrabalhador:
             if dados:
                 noticia = self.__servico_web_scraping.obter_dados(dados=dados)
                 if len(noticia.texto) > 0 or noticia.texto is not None:
+                    score = int(noticia.data_hora.timestamp())
+                    params = {
+                        'score': score,
+                        'valor': url
+                    }
+                    print(f'Inserindo dados da url {url}')
                     id_site = self.__escolha_id_site()
+                    print(f'{id_site}')
                     consulta = self.__scripts_banco.realizar_insercao_lote(id_site=id_site, param=noticia)
-                    self.__lote.append(consulta)
-                    if len(self.__lote) >= self.__tamanho_lote:
-                        self.__conexao_banco.gravar_registro(chave=id_site, dados=self.__lote)
-                        self.__lote.clear()
+
+
+                    self.__conexao_banco.gravar_registro(chave=id_site, dados=consulta)
+                    self.__conexao_redis.enviar_url_processada(chave=self.__chave_links_processados, params=params)
+
 
             return True
         except:
@@ -87,18 +96,28 @@ class NoticiaTrabalhador:
 
     def callback(self, ch: BlockingChannel, method: Basic.Deliver, properties: BasicProperties, body: bytes):
         url = body.decode()
+        if not self.__conexao_redis.consultar_url_processada(chave=self.__chave_links_processados, link=url):  # Url já foi enviada chamar método para consultar url
+            self.__servico_web_scraping.url = url
+            if self.processar_noticia(url=url, set_name='a', method=method):
+                print(f'Url enviada: {url}')
+            else:
+                ch.basic_publish(
+                    exchange=self.__exchange_dlx,
+                    routing_key=self.__dlq_queue,
+                    body=url,
+                    properties=pika.BasicProperties(delivery_mode=2)
+                )
 
-        self.__servico_web_scraping.url = url
-        noticia_processada = self.processar_noticia(url=url, set_name='a', method=method)
-        print(noticia_processada)
-        ch.basic_ack(delivery_tag=method.delivery_tag)
+            ch.basic_ack(delivery_tag=method.delivery_tag)
+        else:
+            print(f'url enviada: {url}')
 
     def rodar(self):
         canal = self.configurar_fila()
         try:
             canal.basic_consume(queue=self.__nome_fila, on_message_callback=self.callback)
             canal.start_consuming()
-        except KeyboardInterrupt:
+        except Exception as e:
             canal.stop_consuming()
             self.__conexao.close()
 
