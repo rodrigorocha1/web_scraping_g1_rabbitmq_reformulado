@@ -13,7 +13,6 @@ class OperacoesBancoMongoDB(IOperacao):
         self.__mongo = MongoClient(Config.URL_MONGODB)  # url mongo
         self.__db = self.__mongo[Config.MONGODB_DOCUMENTO]  # Documento
         self.__colecao = self.__db[Config.MONGODB_COLECAO]
-        print(self.__db.list_collection_names())
 
     @override
     def gravar_registro(self, dados: List[Dict[str, str]]):
