@@ -6,7 +6,8 @@ from typing import Optional
 # Título, subtítulo, texto, autor, data e hora.
 
 @dataclass
-class Noticia:
+class \
+        Noticia:
     id_noticia: str
     titulo: str
     subtitulo: str

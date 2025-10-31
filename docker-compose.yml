@@ -3,15 +3,15 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.40.0.0/16
+        - subnet: 172.41.0.0/16
 
 services:
   rabbitmq:
     image: rabbitmq:4-management
     container_name: rabbitmq
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "5673:5672"     # Porta AMQP alterada
+      - "15673:15672"   # Porta do painel de gerenciamento alterada
     environment:
       - RABBITMQ_DEFAULT_USER=rodrigo
       - RABBITMQ_DEFAULT_PASS=123456
@@ -20,7 +20,7 @@ services:
       - ./rabbitmq_data:/var/lib/rabbitmq
     networks:
       rabbitmq_net:
-        ipv4_address: 172.40.0.10
+        ipv4_address: 172.41.0.10
     restart: unless-stopped
 
   redis:
@@ -35,7 +35,7 @@ services:
       - TZ=America/Sao_Paulo
     networks:
       rabbitmq_net:
-        ipv4_address: 172.40.0.11
+        ipv4_address: 172.41.0.11
     restart: unless-stopped
 
   redisinsight:
@@ -52,7 +52,7 @@ services:
     user: "0:0"
     networks:
       rabbitmq_net:
-        ipv4_address: 172.40.0.12
+        ipv4_address: 172.41.0.12
     restart: unless-stopped
     depends_on:
       - redis
@@ -71,7 +71,7 @@ services:
       - ./redis_commander_data:/home/app/.redis-commander
     networks:
       rabbitmq_net:
-        ipv4_address: 172.40.0.13
+        ipv4_address: 172.41.0.13
     restart: unless-stopped
 
   mongodb:
@@ -88,7 +88,7 @@ services:
       - ./mongo-data:/data/db
     networks:
       rabbitmq_net:
-        ipv4_address: 172.40.0.14
+        ipv4_address: 172.41.0.14
 
 volumes:
   rabbitmq_data:

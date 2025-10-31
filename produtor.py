@@ -42,6 +42,7 @@ class Produtor:
                     if dados:
                         for dados_g1 in self.__servico_web_scraping.obter_dados(dados):
                             url_g1 = dados_g1.get('url_rss')
+                            print(f'Url rss {url_g1}')
 
                             if url_g1:
                                 canal.basic_publish(
@@ -60,6 +61,7 @@ class Produtor:
                                 'data_envio': data_formatada
 
                             }
+
                             self.__banco.gravar_registro(chave=chave, dados=dados)
 
             except KeyboardInterrupt:

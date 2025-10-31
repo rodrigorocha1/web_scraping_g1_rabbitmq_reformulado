@@ -9,9 +9,9 @@ from src.scripts_banco.iscript_banco import IScriptBanco
 class ScriptMongoDB(IScriptBanco):
 
     @override
-    def realizar_insercao_lote(self, noticia: Noticia) -> Dict:
+    def realizar_insercao_lote(self, id_site: int, noticia: Noticia) -> Dict:
         doc = {
-            "id_site": "g1",
+            "id_site": id_site,
             "noticias": [{
                 "id_noticia": noticia.id_noticia,
                 "titulo": noticia.titulo,

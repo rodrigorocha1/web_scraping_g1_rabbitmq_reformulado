@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from enuns.enum_status import EnumStatus
-from produtor.produtor import Produtor
+from produtor import Produtor
 from src.conexao.conexao_redis import ConexaoRedis
 from src.conf_rabbitmq.configuacao_dlx import ConfiguracaoDLX
 from src.servicos.extracao.webscrapingbs4g1rss import WebScrapingBs4G1Rss
