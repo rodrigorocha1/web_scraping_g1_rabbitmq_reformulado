@@ -60,8 +60,11 @@ class ProcessoEtl:
             dados = self.__servico_web_scraping.abrir_conexao()
             if dados:
                 noticia = self.__servico_web_scraping.obter_dados(dados=dados)
-                if len(noticia.texto) > 0 or noticia.texto is not None:
-                    score = int(noticia.data_hora.timestamp())
+                if noticia.texto is not None and len(noticia.texto) > 0:
+                    if noticia.data_hora is not None:
+                        score = int(noticia.data_hora.timestamp())
+                    else:
+                        score = 0  # ou algum valor default
                     params = {
                         'score': score,
                         'valor': url

@@ -33,5 +33,5 @@ class OperacoesBancoMongoDB(IOperacao):
         return False
 
     @override
-    def deletar_hset_por_url(self, url: str) -> int:
+    def deletar_log_erro(self, chave: str, url: str) -> int:
         return 1

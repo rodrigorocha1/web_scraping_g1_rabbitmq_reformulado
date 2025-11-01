@@ -23,7 +23,6 @@ class OperacaoRedis(IOperacao):
 
     @override
     def gravar_registro(self, dados: Dict[str, str], chave: Optional[Union[int, str]] = None):
-
         """
         Método para gerar o het
         :param chave: chave de gravação
@@ -39,16 +38,8 @@ class OperacaoRedis(IOperacao):
         self.__cliente_redis.expire(chave, self.__tempo_expiracao)
 
     @override
-    def deletar_hset_por_url(self, url: str) -> int:
-        """
-        Deleta um hash no Redis usando a URL como chave.
-
-        :param url: chave do hash (URL)
-        :type url: str
-        :return: número de chaves deletadas (0 ou 1)
-        :rtype: int
-        """
-        return self.__cliente_redis.delete(url)
+    def deletar_log_erro(self, chave: str, url: str) -> int:
+        return self.__cliente_redis.hdel(chave, 'url')
 
     @override
     def enviar_url_processada(self, chave: str, params: Dict):
