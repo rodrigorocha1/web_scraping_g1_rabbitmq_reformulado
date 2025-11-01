@@ -1,4 +1,4 @@
-from typing import Dict, Union
+from typing import Dict, Union, Optional
 
 import redis
 from typing_extensions import override
@@ -22,7 +22,8 @@ class OperacaoRedis(IOperacao):
         self.__tempo_expiracao = 604800
 
     @override
-    def gravar_registro(self, dados: Dict[str, str], chave: Union[int, str] = None):
+    def gravar_registro(self, dados: Dict[str, str], chave: Optional[Union[int, str]] = None):
+
         """
         Método para gerar o het
         :param chave: chave de gravação

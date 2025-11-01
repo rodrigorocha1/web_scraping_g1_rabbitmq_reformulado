@@ -1,4 +1,5 @@
 import sys
+from typing import Tuple
 
 import pika
 from bs4 import BeautifulSoup
@@ -57,7 +58,7 @@ class NoticiaTrabalhador:
         self.__dlx.criar_fila_dlx(nome_fila=self.__nome_fila, canal=canal)
         return canal
 
-    def processar_noticia(self, url: str, set_name: str, method: Basic.Deliver):
+    def processar_noticia(self, url: str, set_name: str, method: Basic.Deliver) -> Tuple[bool, str]:
         try:
             self.__servico_web_scraping.url = url
             dados = self.__servico_web_scraping.abrir_conexao()

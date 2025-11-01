@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import Any, Union, Dict
+from typing import Any, Union, Dict, Optional
 
 
 class IOperacao(ABC):
 
     @abstractmethod
-    def gravar_registro(self, dados: Any, chave: Union[int, str] = None):
+    def gravar_registro(self, dados: Any, chave: Optional[Union[int, str]] = None):
         pass
 
     @abstractmethod
