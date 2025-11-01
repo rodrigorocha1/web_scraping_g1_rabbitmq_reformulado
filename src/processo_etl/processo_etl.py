@@ -64,7 +64,7 @@ class ProcessoEtl:
                     if noticia.data_hora is not None:
                         score = int(noticia.data_hora.timestamp())
                     else:
-                        score = 0  # ou algum valor default
+                        score = 0
                     params = {
                         'score': score,
                         'valor': url
