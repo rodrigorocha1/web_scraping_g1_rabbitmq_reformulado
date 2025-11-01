@@ -3,6 +3,7 @@ import sys
 import pika
 
 from src.config.config import Config
+from src.processo_etl.processo_etl import ProcessoEtl
 
 
 class ConsumidorDLX:
@@ -23,6 +24,12 @@ class ConsumidorDLX:
 
         # Nome da fila DLX já existente
         self.__fila_dlq = f"{nome_fila_base}_dead_letter"
+        self.__processo_etl = ProcessoEtl(
+            servico_web_scraping=servico_web_scraping,
+            conexao_banco=conexao_banco,
+            script_banco=script_banco,
+            conexao_log=self.__conexao_log
+        )
 
         print(f"[OK] Conectado ao RabbitMQ. Consumindo da DLX: {self.__fila_dlq}")
 
