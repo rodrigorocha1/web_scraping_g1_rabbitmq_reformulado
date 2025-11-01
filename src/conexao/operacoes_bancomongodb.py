@@ -1,5 +1,4 @@
-import abc
-from typing import Dict, Union, Optional
+from typing import Dict, Union, Optional, Any
 
 from pymongo import MongoClient
 from typing_extensions import override
@@ -25,10 +24,10 @@ class OperacoesBancoMongoDB(IOperacao):
             upsert=True
         )
 
-    @abc.abstractmethod
-    def enviar_url_processada(self, chave: str, params: Dict):
-        pass
+    @override
+    def enviar_url_processada(self, chave: str, params: Dict[str, Any]) -> None:
+        return None
 
-    @abc.abstractmethod
+    @override
     def consultar_url_processada(self, chave: str, link: str) -> bool:
-        pass
+        return False

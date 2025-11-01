@@ -1,4 +1,5 @@
 import sys
+from datetime import datetime
 from typing import Tuple
 
 import pika
@@ -7,6 +8,7 @@ from pika.adapters.blocking_connection import BlockingChannel
 from pika.spec import Basic
 from pika.spec import BasicProperties
 
+from enuns.enum_status import EnumStatus
 from src.conexao.conexao_redis import OperacaoRedis
 from src.conexao.ioperacao import IOperacao
 from src.conexao.operacoes_bancomongodb import OperacoesBancoMongoDB
@@ -78,9 +80,9 @@ class NoticiaTrabalhador:
                     self.__conexao_banco.gravar_registro(chave=id_site, dados=consulta)
                     self.__conexao_log.enviar_url_processada(chave=self.__chave_links_processados, params=params)
 
-            return True
-        except:
-            return False
+            return True, 'Sucesso'
+        except Exception as e:
+            return False, f'Erro: {str(e)}'
 
     def __escolha_id_site(self) -> int:
         match self.__nome_fila:
@@ -97,26 +99,8 @@ class NoticiaTrabalhador:
         url = body.decode()
         if not self.__conexao_log.consultar_url_processada(chave=self.__chave_links_processados, link=url):
             self.__servico_web_scraping.url = url
-            if self.processar_noticia(url=url, set_name='a', method=method):
+            if self.processar_noticia(url=url, set_name='a', method=method)[0]:
                 self.__processo_etl.enviar_noticia(url=url, nome_fila=nome_fila, conexao_log=self.__conexao_log)
-
-                # print(f'Url enviada: {url}')
-                # texto_noticia = url.split('/')[-1].split('.')[-2]
-                # chave = f'log:g1:{nome_fila}:{texto_noticia}'
-                # data_agora = datetime.now()
-                # data_formatada = data_agora.strftime("%d-%m-%Y %H:%M:%S")
-                # dados = {
-                #     'url': url,
-                #     'status': EnumStatus.PROCESSADO.name,
-                #     'data_envio': data_formatada
-                #
-                # }
-                #
-                # self.__conexao_redis.gravar_registro(chave=chave, dados=dados)
-
-
-
-
             else:
                 ch.basic_publish(
                     exchange=self.__exchange_dlx,
@@ -124,6 +108,16 @@ class NoticiaTrabalhador:
                     body=url,
                     properties=pika.BasicProperties(delivery_mode=2)
                 )
+                chave = f'log:g1:erro_dlx:{nome_fila}'
+                data_agora = datetime.now()
+                data_formatada = data_agora.strftime("%d-%m-%Y %H:%M:%S")
+                dados = {
+                    'url': url,
+                    'status': EnumStatus.EM_PROCESSO.ERRO_ENVIADO_FILA_DLX,
+                    'data_envio': data_formatada
+
+                }
+                self.__conexao_log.gravar_registro(chave=chave, dados=dados)
 
             ch.basic_ack(delivery_tag=method.delivery_tag)
         else:
