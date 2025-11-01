@@ -39,7 +39,8 @@ class OperacaoRedis(IOperacao):
 
     @override
     def enviar_url_processada(self, chave: str, params: Dict):
-        self.__cliente_redis.zadd(chave, {params['valor']: params['score']})
+        self.__cliente_redis.zadd(chave, {params['valor']: params['score']}, )
+        self.__cliente_redis.expire(chave, self.__tempo_expiracao)  # TTL
 
     @override
     def consultar_url_processada(self, chave: str, link: str) -> bool:
