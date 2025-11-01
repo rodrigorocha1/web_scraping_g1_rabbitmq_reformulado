@@ -15,3 +15,7 @@ class IOperacao(ABC):
     @abstractmethod
     def consultar_url_processada(self, chave: str, link: str) -> bool:
         pass
+
+    @abstractmethod
+    def deletar_hset_por_url(self, url: str) -> int:
+        pass

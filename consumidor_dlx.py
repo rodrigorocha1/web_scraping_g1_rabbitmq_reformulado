@@ -28,7 +28,11 @@ class ConsumidorDLX:
 
     def consumir(self):
         def callback(ch, method, properties, body):
+            url = body.decode()
+
+
             print(f"[DLX] Mensagem recebida: {body.decode()}")
+
             ch.basic_ack(delivery_tag=method.delivery_tag)
 
 

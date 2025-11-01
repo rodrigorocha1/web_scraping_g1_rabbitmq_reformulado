@@ -39,6 +39,18 @@ class OperacaoRedis(IOperacao):
         self.__cliente_redis.expire(chave, self.__tempo_expiracao)
 
     @override
+    def deletar_hset_por_url(self, url: str) -> int:
+        """
+        Deleta um hash no Redis usando a URL como chave.
+
+        :param url: chave do hash (URL)
+        :type url: str
+        :return: número de chaves deletadas (0 ou 1)
+        :rtype: int
+        """
+        return self.__cliente_redis.delete(url)
+
+    @override
     def enviar_url_processada(self, chave: str, params: Dict):
         self.__cliente_redis.zadd(chave, {params['valor']: params['score']}, )
         self.__cliente_redis.expire(chave, self.__tempo_expiracao)  # TTL

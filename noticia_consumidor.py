@@ -1,6 +1,5 @@
 import sys
 from datetime import datetime
-from typing import Tuple
 
 import pika
 from bs4 import BeautifulSoup
@@ -49,9 +48,14 @@ class NoticiaTrabalhador:
         self.__conexao_log = conexao_log
         self.__exchange_dlx = 'dead_letter_exchange'
         self.__dlq_queue = f'{nome_fila}_dead_letter'
-        self.__scripts_banco = script_banco
-        self.__conexao_banco = conexao_banco
-        self.__processo_etl = ProcessoEtl(servico_web_scraping)
+
+        self.__processo_etl = ProcessoEtl(
+            servico_web_scraping=servico_web_scraping,
+            conexao_banco=conexao_banco,
+            script_banco=script_banco,
+            conexao_log=self.__conexao_log
+        )
+
         self.__dlx = ConfiguracaoDLX(self.__exchange_dlx)
         self.__chave_links_processados = f'links:processados:{self.__nome_fila.replace("fila_g1_", "")}'
 
@@ -60,47 +64,13 @@ class NoticiaTrabalhador:
         self.__dlx.criar_fila_dlx(nome_fila=self.__nome_fila, canal=canal)
         return canal
 
-    def processar_noticia(self, url: str, set_name: str, method: Basic.Deliver) -> Tuple[bool, str]:
-        try:
-            self.__servico_web_scraping.url = url
-            dados = self.__servico_web_scraping.abrir_conexao()
-            if dados:
-                noticia = self.__servico_web_scraping.obter_dados(dados=dados)
-                if len(noticia.texto) > 0 or noticia.texto is not None:
-                    score = int(noticia.data_hora.timestamp())
-                    params = {
-                        'score': score,
-                        'valor': url
-                    }
-                    print(f'Inserindo dados da url {url}')
-                    id_site = self.__escolha_id_site()
-                    print(f'{id_site}')
-                    consulta = self.__scripts_banco.realizar_insercao_lote(id_site=id_site, param=noticia)
-
-                    self.__conexao_banco.gravar_registro(chave=id_site, dados=consulta)
-                    self.__conexao_log.enviar_url_processada(chave=self.__chave_links_processados, params=params)
-
-            return True, 'Sucesso'
-        except Exception as e:
-            return False, f'Erro: {str(e)}'
-
-    def __escolha_id_site(self) -> int:
-        match self.__nome_fila:
-            case 'fila_g1_ribeirao_preto':
-                return 1
-            case 'fila_g1_para':
-                return 2
-            case 'fila_g1_tecnologia':
-                return 3
-            case _:
-                raise ValueError(f"Fila desconhecida: {self.__nome_fila}")
-
     def callback(self, ch: BlockingChannel, method: Basic.Deliver, properties: BasicProperties, body: bytes):
         url = body.decode()
         if not self.__conexao_log.consultar_url_processada(chave=self.__chave_links_processados, link=url):
             self.__servico_web_scraping.url = url
-            if self.processar_noticia(url=url, set_name='a', method=method)[0]:
-                self.__processo_etl.enviar_noticia(url=url, nome_fila=nome_fila, conexao_log=self.__conexao_log)
+            if self.__processo_etl.processar_noticia(url=url, nome_fila=self.__nome_fila,
+                                                     chave_links_processados=self.__chave_links_processados)[0]:
+                self.__processo_etl.enviar_noticia(url=url, nome_fila=nome_fila)
             else:
                 ch.basic_publish(
                     exchange=self.__exchange_dlx,

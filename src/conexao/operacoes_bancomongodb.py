@@ -31,3 +31,7 @@ class OperacoesBancoMongoDB(IOperacao):
     @override
     def consultar_url_processada(self, chave: str, link: str) -> bool:
         return False
+
+    @override
+    def deletar_hset_por_url(self, url: str) -> int:
+        return 1
