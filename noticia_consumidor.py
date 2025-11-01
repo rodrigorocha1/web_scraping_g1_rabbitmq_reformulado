@@ -1,4 +1,5 @@
 import sys
+from datetime import datetime
 from typing import List, Dict
 
 import pika
@@ -7,6 +8,7 @@ from pika.adapters.blocking_connection import BlockingChannel
 from pika.spec import Basic
 from pika.spec import BasicProperties
 
+from enuns.enum_status import EnumStatus
 from src.conexao.conexao_redis import OperacaoRedis
 from src.conexao.ioperacao import IOperacao
 from src.conexao.operacoes_bancomongodb import OperacoesBancoMongoDB
@@ -98,6 +100,18 @@ class NoticiaTrabalhador:
             self.__servico_web_scraping.url = url
             if self.processar_noticia(url=url, set_name='a', method=method):
                 print(f'Url enviada: {url}')
+                texto_noticia = url.split('/')[-1].split('.')[-2]
+                chave = f'log:g1:{nome_fila}:{texto_noticia}'
+                data_agora = datetime.now()
+                data_formatada = data_agora.strftime("%d-%m-%Y %H:%M:%S")
+                dados = {
+                    'url': url,
+                    'status': EnumStatus.PROCESSADO.name,
+                    'data_envio': data_formatada
+
+                }
+
+                self.__conexao_redis.gravar_registro(chave=chave, dados=dados)
             else:
                 ch.basic_publish(
                     exchange=self.__exchange_dlx,
