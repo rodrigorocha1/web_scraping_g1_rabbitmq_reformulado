@@ -47,8 +47,6 @@ class NoticiaTrabalhador:
         self.__dlq_queue = f'{nome_fila}_dead_letter'
         self.__scripts_banco = script_banco
         self.__conexao_banco = conexao_banco
-        self.__lote: List[Dict] = []
-        self.__tamanho_lote = 60
         self.__dlx = ConfiguracaoDLX(self.__exchange_dlx)
         self.__chave_links_processados = f'links:processados:{self.__nome_fila.replace("fila_g1_", "")}'
 
@@ -96,7 +94,7 @@ class NoticiaTrabalhador:
 
     def callback(self, ch: BlockingChannel, method: Basic.Deliver, properties: BasicProperties, body: bytes):
         url = body.decode()
-        if not self.__conexao_redis.consultar_url_processada(chave=self.__chave_links_processados, link=url):  # Url já foi enviada chamar método para consultar url
+        if not self.__conexao_redis.consultar_url_processada(chave=self.__chave_links_processados, link=url):
             self.__servico_web_scraping.url = url
             if self.processar_noticia(url=url, set_name='a', method=method):
                 print(f'Url enviada: {url}')
