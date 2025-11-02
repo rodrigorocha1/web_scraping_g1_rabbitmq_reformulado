@@ -39,15 +39,42 @@ class OperacaoRedis(IOperacao):
 
     @override
     def deletar_log_erro(self, chave: str, url: str) -> int:
+        """
+        Método para deletar url da chave log
+        :param chave: chave do redis
+        :type chave: string
+        :param url: url a ser deletada
+        :type url: string
+        :return: 1 se sucesso o 0 se caso contrário
+        :rtype: int
+        """
         return self.__cliente_redis.hdel(chave, 'url')
 
     @override
     def enviar_url_processada(self, chave: str, params: Dict):
+        """
+        Método para gravar a url processada
+        :param chave: chave do redis
+        :type chave: str
+        :param params: composição dos valores
+        :type params: Dict
+        :return:
+        :rtype:
+        """
         self.__cliente_redis.zadd(chave, {params['valor']: params['score']}, )
         self.__cliente_redis.expire(chave, self.__tempo_expiracao)  # TTL
 
     @override
     def consultar_url_processada(self, chave: str, link: str) -> bool:
+        """
+        Método para verificar se a url já foi enviada
+        :param chave:chave do redis
+        :type chave: str
+        :param link: link do site do g1
+        :type link: str
+        :return: retorna verdadeiro se não foi enviado ou falso caso contrário
+        :rtype: bool
+        """
         score = self.__cliente_redis.zscore(chave, link)
         print(score, link)
         if score is not None:
