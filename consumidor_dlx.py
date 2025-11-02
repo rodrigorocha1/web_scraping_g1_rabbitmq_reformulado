@@ -1,11 +1,11 @@
 import sys
 
-import pika
+from pika.exceptions import AMQPConnectionError
 
 from src.conexao.conexao_redis import OperacaoRedis
 from src.conexao.ioperacao import IOperacao
 from src.conexao.operacoes_bancomongodb import OperacoesBancoMongoDB
-from src.config.config import Config
+from src.conf_rabbitmq.conexao_rabbitmq import ConexaoRabbitMq
 from src.processo_etl.processo_etl import ProcessoEtl
 from src.scripts_banco.iscript_banco import IScriptBanco
 from src.scripts_banco.script_mongo_db import ScriptMongoDB
@@ -14,20 +14,15 @@ from src.servicos.extracao.webscrapingsiteg1 import WebScrapingG1
 
 class ConsumidorDLX:
 
-    def __init__(self,
-                 nome_fila: str,
-                 conexao_banco: IOperacao,
-                 script_banco: IScriptBanco,
-                 conexao_log: IOperacao
-                 ):
-        self.__parametros_conexao = pika.ConnectionParameters(
-            host=Config.URL_RABBITMQ,
-            port=Config.PORTA_RABBITMQ,
-            virtual_host=Config.VIRTUAL_HOST_RABBITMQ,
-            credentials=pika.PlainCredentials(Config.USR_RABBITMQ, Config.PWD_RABBITMQ)
-        )
-        self.__conexao = pika.BlockingConnection(self.__parametros_conexao)
-        self.__canal = self.__conexao.channel()
+    def __init__(
+            self,
+            nome_fila: str,
+            conexao_banco: IOperacao,
+            script_banco: IScriptBanco,
+            conexao_log: IOperacao
+    ):
+
+        self.__conexao = ConexaoRabbitMq()
         self.__nome_fila = nome_fila
         self.__conexao_log = conexao_log
         self.__chave_links_processados = f'links:processados:{self.__nome_fila.replace("fila_g1_", "")}'
@@ -44,6 +39,7 @@ class ConsumidorDLX:
         print(f"[OK] Conectado ao RabbitMQ. Consumindo da DLX: {self.__fila_dlq}")
 
     def consumir(self):
+
         def callback(ch, method, properties, body):
             url = body.decode()
 
@@ -51,22 +47,38 @@ class ConsumidorDLX:
 
             flag = self.__processo_etl.processar_noticia(
                 url=url,
-                nome_fila=nome_fila,
+                nome_fila=self.__nome_fila,  # <-- CORRIGIDO: deve usar self.
                 chave_links_processados=self.__chave_links_processados
             )[0]
+
             if flag:
                 self.__conexao_log.deletar_log_erro(url=url)
 
             ch.basic_ack(delivery_tag=method.delivery_tag)
 
-        self.__canal.basic_consume(
-            queue=self.__fila_dlq,
-            on_message_callback=callback,
-            auto_ack=False
-        )
+        try:
 
-        print("[*] Aguardando mensagens na DLX...")
-        self.__canal.start_consuming()
+            with self.__conexao as conexao:
+
+                canal = conexao.channel()
+
+                canal.basic_consume(
+                    queue=self.__fila_dlq,
+                    on_message_callback=callback,
+                    auto_ack=False
+                )
+
+                print(f"[*] Aguardando mensagens na DLX: {self.__fila_dlq}...")
+
+                canal.start_consuming()
+
+        except AMQPConnectionError as e:
+            print(f"[ERRO] Falha ao conectar no RabbitMQ: {e}")
+        except KeyboardInterrupt:
+            print("\n[INFO] Consumidor interrompido pelo usuário.")
+
+        finally:
+            print("[INFO] Conexão com RabbitMQ fechada.")
 
 
 if __name__ == "__main__":

@@ -11,6 +11,7 @@ from enuns.enum_status import EnumStatus
 from src.conexao.conexao_redis import OperacaoRedis
 from src.conexao.ioperacao import IOperacao
 from src.conexao.operacoes_bancomongodb import OperacoesBancoMongoDB
+from src.conf_rabbitmq.conexao_rabbitmq import ConexaoRabbitMq
 from src.conf_rabbitmq.configuacao_dlx import ConfiguracaoDLX
 from src.models.noticia import Noticia
 from src.processo_etl.processo_etl import ProcessoEtl
@@ -21,8 +22,6 @@ from src.servicos.extracao.webscrapingsiteg1 import WebScrapingG1
 
 TIPO_SCRAPING = BeautifulSoup
 DadosG1Gerador = Noticia
-
-from src.config.config import Config
 
 
 class NoticiaTrabalhador:
@@ -35,14 +34,8 @@ class NoticiaTrabalhador:
             conexao_banco: IOperacao,
             conexao_log: IOperacao
     ):
-        self.__credenciais = pika.PlainCredentials(Config.USR_RABBITMQ, Config.PWD_RABBITMQ)
-        self.__parametros_conexao = pika.ConnectionParameters(
-            host=Config.URL_RABBITMQ,
-            port=Config.PORTA_RABBITMQ,
-            virtual_host=Config.VIRTUAL_HOST_RABBITMQ,
-            credentials=self.__credenciais
-        )
-        self.__conexao = pika.BlockingConnection(self.__parametros_conexao)
+
+        self.__conexao = ConexaoRabbitMq()
         self.__servico_web_scraping = servico_web_scraping
         self.__nome_fila = nome_fila
         self.__conexao_log = conexao_log
