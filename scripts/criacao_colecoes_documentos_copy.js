@@ -91,5 +91,22 @@ db.createCollection("noticias", {
 });
 
 
-db.noticias.find({ id_site: 3 })
+db.noticias.aggregate([
+  { $unwind: "$noticias" },
+  { $sort: { "noticias.data_hora": -1 } },
+  {
+    $project: {
+      _id: 0,
+      id_site: 1,
+      "noticias.id_noticia": 1,
+      "noticias.titulo": 1,
+      "noticias.autor": 1,
+      "noticias.data_hora": 1,
+      "noticias.texto": 1
+    }
+  }
+]);
+
+
+db.noticias.find({ id_site: 1 })
 db.noticias.deleteMany({})
