@@ -58,19 +58,17 @@ class ConsumidorDLX:
 
         try:
 
-            with self.__conexao as conexao:
+            canal = self.__conexao.conectar()
 
-                canal = conexao.channel()
+            canal.basic_consume(
+                queue=self.__fila_dlq,
+                on_message_callback=callback,
+                auto_ack=False
+            )
 
-                canal.basic_consume(
-                    queue=self.__fila_dlq,
-                    on_message_callback=callback,
-                    auto_ack=False
-                )
+            print(f"[*] Aguardando mensagens na DLX: {self.__fila_dlq}...")
 
-                print(f"[*] Aguardando mensagens na DLX: {self.__fila_dlq}...")
-
-                canal.start_consuming()
+            canal.start_consuming()
 
         except AMQPConnectionError as e:
             print(f"[ERRO] Falha ao conectar no RabbitMQ: {e}")

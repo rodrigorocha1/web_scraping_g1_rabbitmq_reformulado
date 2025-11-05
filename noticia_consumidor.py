@@ -48,52 +48,64 @@ class NoticiaTrabalhador:
             script_banco=script_banco,
             conexao_log=self.__conexao_log
         )
+        print('Consumidor inicializado')
 
         self.__dlx = ConfiguracaoDLX(self.__exchange_dlx)
         self.__chave_links_processados = f'links:processados:{self.__nome_fila.replace("fila_g1_", "")}'
 
     def configurar_fila(self):
-        canal = self.__conexao.channel()
+
+        canal = self.__conexao.conectar()
         self.__dlx.criar_fila_dlx(nome_fila=self.__nome_fila, canal=canal)
+
         return canal
 
     def callback(self, ch: BlockingChannel, method: Basic.Deliver, properties: BasicProperties, body: bytes):
-        url = body.decode()
-        if not self.__conexao_log.consultar_url_processada(chave=self.__chave_links_processados, link=url):
-            self.__servico_web_scraping.url = url
-            if self.__processo_etl.processar_noticia(url=url, nome_fila=self.__nome_fila,
-                                                     chave_links_processados=self.__chave_links_processados)[0]:
-                self.__processo_etl.enviar_noticia(url=url, nome_fila=nome_fila)
+        try:
+            url = body.decode()
+            print(f'consumidor url: {url}')
+            if not self.__conexao_log.consultar_url_processada(chave=self.__chave_links_processados, link=url):
+                self.__servico_web_scraping.url = url
+                if self.__processo_etl.processar_noticia(url=url, nome_fila=self.__nome_fila,
+                                                         chave_links_processados=self.__chave_links_processados)[0]:
+                    self.__processo_etl.enviar_noticia(url=url, nome_fila=nome_fila)
+                else:
+                    ch.basic_publish(
+                        exchange=self.__exchange_dlx,
+                        routing_key=self.__dlq_queue,
+                        body=url,
+                        properties=pika.BasicProperties(delivery_mode=2)
+                    )
+                    chave = f'log:g1:erro_dlx:{nome_fila}'
+                    data_agora = datetime.now()
+                    data_formatada = data_agora.strftime("%d-%m-%Y %H:%M:%S")
+                    dados = {
+                        'url': url,
+                        'status': EnumStatus.EM_PROCESSO.ERRO_ENVIADO_FILA_DLX,
+                        'data_envio': data_formatada
+
+                    }
+                    self.__conexao_log.gravar_registro(chave=chave, dados=dados)
+
+                ch.basic_ack(delivery_tag=method.delivery_tag)
             else:
-                ch.basic_publish(
-                    exchange=self.__exchange_dlx,
-                    routing_key=self.__dlq_queue,
-                    body=url,
-                    properties=pika.BasicProperties(delivery_mode=2)
-                )
-                chave = f'log:g1:erro_dlx:{nome_fila}'
-                data_agora = datetime.now()
-                data_formatada = data_agora.strftime("%d-%m-%Y %H:%M:%S")
-                dados = {
-                    'url': url,
-                    'status': EnumStatus.EM_PROCESSO.ERRO_ENVIADO_FILA_DLX,
-                    'data_envio': data_formatada
+                print(f'url enviada: {url}')
+        except Exception as e:
 
-                }
-                self.__conexao_log.gravar_registro(chave=chave, dados=dados)
+            print(f"Erro no callback: {e}")
+            ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
 
-            ch.basic_ack(delivery_tag=method.delivery_tag)
-        else:
-            print(f'url enviada: {url}')
 
     def rodar(self):
+        print('método rodar')
         canal = self.configurar_fila()
+        print(f"Consumindo da fila: {self.__nome_fila}")
         try:
             canal.basic_consume(queue=self.__nome_fila, on_message_callback=self.callback)
             canal.start_consuming()
         except Exception as e:
+            print(f"Erro no loop de consumo: {e}")
             canal.stop_consuming()
-            self.__conexao.close()
 
 
 if __name__ == '__main__':

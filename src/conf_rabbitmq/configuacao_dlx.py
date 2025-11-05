@@ -4,6 +4,7 @@ from pika.adapters.blocking_connection import BlockingChannel
 class ConfiguracaoDLX:
     def __init__(self, exchange_dlx: str = 'dead_letter_exchange'):
         self.__exchange_dlx = exchange_dlx
+        print('DLX INICIALIZADO')
 
     def criar_fila_dlx(self, nome_fila: str, canal: BlockingChannel):
         fila_dlq = f"{nome_fila}_dead_letter"
